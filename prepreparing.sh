@@ -22,13 +22,13 @@ function pooling {
 # genome reference 12
 
         vcf=${9}${7}
-        vcfsnps=${9}${8}"_chr"${6}"_SNPs.vcf"
+        vcfsnps=${9}${8}"_chr${6}_SNPs.vcf"
 
-        if [ $1 -eq 1 ] && [ $2 -eq 1 ]; then
+        if [ "$1" -eq 1 ] && [ "$2" -eq 1 ]; then
 
                 tend=".tar.gz"
                 tarfile=${vcf}${tend}
-                tar -zxvf ${tarfile} -C $9
+                tar -zxvf "${tarfile}" -C "$9"
                 echo "tar.gz file for chr=$6 decompressed!"
 
         else
@@ -36,7 +36,7 @@ function pooling {
 
                         tend=".tar"
                         tarfile=${vcf}${tend}
-                        tar -xvf ${tarfile} -C $9
+                        tar -xvf "${tarfile}" -C "$9"
                         echo "tar file for chr=$6 decompressed!"
                 fi
 
@@ -44,33 +44,32 @@ function pooling {
 
                         gend=".gz"
                         gzfile=${vcf}${gend}
-                        gunzip -f ${gzfile} > ${vcf}
+                        gunzip -f "${gzfile}" > "${vcf}"
                         echo "gz file for chr=$6 decompressed!"
                 fi
         fi
 
         if [[ $3 -eq 1 ]]; then
                 echo "running SelectVariants for chr=$4"
-                ${11}gatk SelectVariants -R ${12} -V ${vcf} -O ${vcfsnps} -select-type-to-include SNP
+                "${11}"gatk SelectVariants -R "${12}" -V "${vcf}" -O "${vcfsnps}" -select-type-to-include SNP
                 echo "$6 SNPs.vcf done!"
         fi
 
         if [[ $4 -eq 1 ]]; then
                 echo "stats for chr=$6 started!"
-                python3 vcf_stats.py -input ${vcfsnps}
+                python3 vcf_stats.py -input "${vcfsnps}"
                 echo "stats file for chr=$6 done!"
         fi
 
         if [[ $5 -eq 1 ]]; then
                 echo "running vcf_to_matrix for chr $6"
-                python3 vcf_to_matrix.py -chr $6 -input ${vcfsnps} -outdir ${10} >> ${10}'genome_stats.txt'
+                python3 vcf_to_matrix.py -chr "$6" -input "${vcfsnps}" -outdir "${10}" >> "${10}genome_stats.txt"
                 echo "matrices for chr $6 done!"
         fi
         # after this, run only once each function:
         # > make_pid-diagnoses.py (change rules for establishing diagnoses)
         # > makeY.py
         # > makeX_pooling.sh
-        
 }
 
 
@@ -101,7 +100,7 @@ while [[ "$1" != "" ]]; do
         case $1 in
 
         -chr | -c )             shift
-                                ch=$1
+                                chr=$1
                                 ;;
         -all | -a )             all=1
                                 ;;
@@ -141,10 +140,10 @@ while [[ "$1" != "" ]]; do
                                 gatk_dir=$1
                                 ;;
         -reference )            shift
-                                reference=$1
+                                ref=$1
                                 ;;
         -vcf | -vcffile )       shift
-                                s=(${1//chr/ })
+                                s=("${1//chr/ }")
                                 #s=(${1//\{chr\}/ })
                                 vcfstart=${s[0]}'chr'
                                 vcfend=${s[1]}
@@ -160,7 +159,7 @@ if [[ ! -v ${files_dir} ]]; then
 fi
 
 if [[ ! -d ${files_dir} ]]; then
-    mkdir ${files_dir}
+    mkdir "${files_dir}"
 fi
 
 if [[ ! -v ${matrices_dir} ]]; then
@@ -168,7 +167,7 @@ if [[ ! -v ${matrices_dir} ]]; then
 fi
 
 if [[ ! -d ${matrices_dir} ]]; then
-    mkdir ${matrices_dir}
+    mkdir "${matrices_dir}"
 fi
 
 echo "Parameters are established!"
@@ -186,7 +185,7 @@ echo "Parameters are established!"
 if [[ $all -eq 1 ]]; then
         job_pool_init $((to-from+1)) 0
 
-        for (( ch = $from; ch <= $to; ch++ )); do
+        for (( ch = from; ch <= to; ch++ )); do
 
                 if [[ $ch -eq 23 ]] && [[ $x -eq 1 ]]; then
 
@@ -200,19 +199,19 @@ if [[ $all -eq 1 ]]; then
                         vcfname=${vcfstart}${ch}${vcfend}
                 fi
 
-                job_pool_run pooling ${tar} ${gz} ${snp} ${stats} ${matrix} ${ch} ${vcfname} ${base} ${files_dir} ${matrices_dir} ${gatk_dir} ${ref}
+                job_pool_run pooling ${tar} ${gz} ${snp} ${stats} ${matrix} "${ch}" "${vcfname}" "${base}" "${files_dir}" "${matrices_dir}" "${gatk_dir}" "${ref}"
 
         done
 
         job_pool_shutdown
         echo "job_pool_nerrors: ${job_pool_nerrors}"
 else
-        vcfname=${vcfstart}${ch}${vcfend}
-        pooling ${tar} ${gz} ${snp} ${stats} ${matrix} ${ch} ${vcfname} ${base} ${files_dir} ${matrices_dir} ${gatk_dir} ${ref}
+        vcfname=${vcfstart}${chr}${vcfend}
+        pooling ${tar} ${gz} ${snp} ${stats} ${matrix} "${chr}" "${vcfname}" "${base}" "${files_dir}" "${matrices_dir}" "${gatk_dir}" "${ref}"
 fi
 
 if [[ $matrix -eq 1 ]]; then
 
-        sort -k1 -n -o ${matrices_dir}'genome_stats.txt' ${matrices_dir}'genome_stats.txt'
+        sort -k1 -n -o "${matrices_dir}genome_stats.txt" "${matrices_dir}genome_stats.txt"
 
 fi
