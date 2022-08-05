@@ -143,7 +143,7 @@ while [[ "$1" != "" ]]; do
                                 ref=$1
                                 ;;
         -vcf | -vcffile )       shift
-                                s=("${1//chr/ }")
+                                s=(${1//chr/ })
                                 #s=(${1//\{chr\}/ })
                                 vcfstart=${s[0]}'chr'
                                 vcfend=${s[1]}
