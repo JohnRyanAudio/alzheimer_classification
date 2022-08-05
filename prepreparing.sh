@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 . job_pool.sh
 
@@ -154,7 +154,7 @@ while [[ "$1" != "" ]]; do
         shift
 done
 
-if [[ ! -v ${files_dir} ]]; then
+if [[ ! -v files_dir ]]; then
     files_dir=${dir}"files/"
 fi
 
@@ -162,7 +162,7 @@ if [[ ! -d ${files_dir} ]]; then
     mkdir "${files_dir}"
 fi
 
-if [[ ! -v ${matrices_dir} ]]; then
+if [[ ! -v matrices_dir ]]; then
     matrices_dir=${dir}"matrices/"
 fi
 
