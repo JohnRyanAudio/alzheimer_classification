@@ -82,10 +82,13 @@ def adni_mapping(files, indir):
 def test_mapping(files, indir):
     assert len(files) == 1, files
     dd = {}
+    print(indir)
+    print(files)
     with open(os.path.join(indir, files[0]), 'r') as f:
         for line in f:
-            l = line.strip().split('\t')
+            l = line.strip().split(',')
             dd[l[0]] = l[1]
+    print(len(dd))
     return dd
 
 
@@ -163,6 +166,7 @@ def write_files(dataset, dd, indir, outdir):
     """
     pid_files = [os.path.join(indir, el) for el in os.listdir(indir) if
                  el.startswith('pid_chr') and el.endswith('.txt')]
+    print(pid_files)
     try:
         o = open(pid_files[0], 'r')
         fp = open("%spid_chr.txt" % outdir, 'w')
@@ -180,15 +184,12 @@ def write_files(dataset, dd, indir, outdir):
         if 'fp' in locals():
             fp.write(line)
         try:
-            if dataset == 'adni':
-                pid = line.strip().split('_')[-1]
-            else:
-                pid = line.strip()
+            pid = line.strip()
             fd.write('%s\n' % dd[pid])
-            i += 1
         except KeyError:
             fd.write('NN\n')
             n += 1
+        i += 1
 
     o.close()
     if 'fp' in globals():
@@ -224,7 +225,7 @@ if 'outdir' not in globals():
     outdir = '%smatrices/' % dir
 
 if dataset == 'test':
-    dfiles = ['test_diagnoses.tsv']
+    dfiles = ['test_diagnoses.csv']
     dd = test_mapping(dfiles, diagdir)
 if dataset == 'adni':
     dfiles = ['dxsum.csv']

@@ -1,4 +1,5 @@
 import sys
+# from turtle import pd
 
 '''
 See readme.txt for input, output and possible options.
@@ -14,19 +15,15 @@ def makeY(indir, outdir):
     o = open('%sdif_chr.txt' % outdir, 'w')
 
     i = 0
-    ad = 0
-    nl = 0
-
     for pline, dline in zip(pid, diag):
 
-        if dline.strip() == 'NL':
-            y.write('%d,0\n' % (nl+ad))
-            nl += 1
-        elif dline.strip() == 'AD':
-            y.write('%d,1\n' % (nl+ad))
-            ad += 1
+        if dline.strip() == '1':
+            y.write('%d,1\n' % (i))
+        elif dline.strip() == '0':
+            y.write('%d,0\n' % (i))
         else:
-            o.write('%s\t%s\t%d\n' % (pline.strip(), dline.strip(), i))
+            # o.write('%s\t%s\t%d\n' % (pline.strip(), dline.strip(), i))
+            y.write('%d,2\n' % (i))
         i += 1
 
     pid.close()
@@ -34,7 +31,7 @@ def makeY(indir, outdir):
     y.close()
     o.close()
 
-    return ad, nl
+    return i
 
 
 def update_genome_stats(indir, pat):
@@ -71,6 +68,6 @@ if 'indir' not in globals():
 if 'outdir' not in globals():
     outdir = '%smatrices/' % dir
 
-ad, nl = makeY(indir, outdir)
-update_genome_stats(indir, ad+nl)
-print('Number of patients for further analysis: %d (contains AD=%d, NL=%d)' % (ad+nl, ad, nl))
+pd = makeY(indir, outdir)
+update_genome_stats(indir, pd)
+print('Number of patients for further analysis: %d' % (pd))
